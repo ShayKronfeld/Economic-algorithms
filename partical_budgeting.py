@@ -44,6 +44,7 @@ def find_decomposition(budget, preferences):
     bounds = [(0, None)] * num_vars
 
     # Solve the linear program using scipy
+    # Use the HiGHS solver: a modern, fast, and numerically stable LP solver
     res = linprog(c, A_eq=A_eq, b_eq=b_eq, bounds=bounds, method='highs')
 
     if res.success:
