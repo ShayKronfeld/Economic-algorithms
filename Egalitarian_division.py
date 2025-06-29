@@ -4,21 +4,24 @@ import numpy
 # shay kronfeld- 322234782
 
 def Egalitarian_division(matrix):
-    values = numpy.array(matrix)
-    num_peoples, num_resources = values.shape
+    values = numpy.array(matrix) # Convert input list to a NumPy array 
+    num_peoples, num_resources = values.shape # Get the number of people (agents) and number of resources
     
-    # Define variables for each resource allocation for each person
+    # Create a CVXPY variable for the allocation matrix
     x = cvxpy.Variable((num_peoples, num_resources))
     
     # Calculate the utilities for each person based on the allocation
+    # cvxpy.multiply(x, values): multiplication of allocation matrix and valuation matrix
+    # axis=1: sums across each row (i.e., for each person), returning a vector of total utilities
     utilities = cvxpy.sum(cvxpy.multiply(x, values), axis=1)
-    
+
+    # Create a variable to represent the minimum utility to be maximized
     min_utility = cvxpy.Variable()
     
     constraints = [
         cvxpy.sum(x, axis=0) == 1,  # Each resource is fully allocated
-        x >= 0,                  # Cannot allocate negative amounts
-        x <= 1,                  # Cannot allocate more than 1 unit
+        x >= 0,                  # Cannot allocate negative amounts (for each element in the matrix) 
+        x <= 1,                  # Cannot allocate more than 1 unit (for each element in the matrix)
     ]
     
     # Add constraints to ensure the minimum utility is less than or equal to each person's utility
@@ -28,7 +31,8 @@ def Egalitarian_division(matrix):
     # Define the optimization problem 
     problem = cvxpy.Problem(cvxpy.Maximize(min_utility), constraints)
     problem.solve()
-    
+    # After solving, all CVXPY variables (e.g., x, min_utility) hold their solution in `.value`
+
     results = []
     for i in range(num_peoples):
         results.append([x[i, j].value for j in range(num_resources)])
