@@ -7,6 +7,7 @@ def find_decomposition(budget, preferences):
     C = sum(budget)             # Total available budget
 
     # Map each variable (i,j) → index in the linear program
+    # Assign a unique index to each variable x[i,j] (where player i supports topic j) so it can be used in the 1D vector representation required by linprog
     var_indices = {}
     idx = 0
     for i in range(n):
@@ -19,8 +20,8 @@ def find_decomposition(budget, preferences):
     c = np.zeros(num_vars)
 
     # Equality constraints: A_eq x = b_eq
-    A_eq = []
-    b_eq = []
+    A_eq = [] # A_eq is the matrix of equality constraint coefficients (each row defines weights for one constraint)
+    b_eq = [] # b_eq is the vector of target values for each equality constraint (right-hand side of the equations)
 
     # Constraint 1: each player must contribute exactly C/n to their supported topics
     for i in range(n):
@@ -39,7 +40,7 @@ def find_decomposition(budget, preferences):
         A_eq.append(row)
         b_eq.append(budget[j])
 
-    # Bounds: all variables must be non-negative
+    # Creates a list of length num_vars; each entry defines the bounds for a variable (here: all variables must be ≥ 0)
     bounds = [(0, None)] * num_vars
 
     # Solve the linear program using scipy
