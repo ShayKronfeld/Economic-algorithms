@@ -1,9 +1,6 @@
 import numpy as np
 import cvxpy
 
-import cvxpy
-import numpy as np
-
 def calculate_resource_prices(matrix, allocation, budgets):
     num_players = len(matrix)
     num_resources = len(matrix[0])
@@ -42,12 +39,15 @@ def calculate_equilibrium(matrix, budgets):
     
     # Ensure total allocation per resource sums to 1, and allocations are within [0, 1]
     for j in range(num_resources):
-        constraints.append(cvxpy.sum(allocation[j, :]) == 1)
+        constraints.append(cvxpy.sum(allocation[j, :]) == 1) # sum the row j
         for i in range(num_players):
             constraints.append(allocation[j, i] >= 0)
             constraints.append(allocation[j, i] <= 1)
 
-    # Calculate utilities for each player
+    # Compute utility for each player:
+    # - Multiply allocated amount of each resource by the player's valuation
+    # - Sum over all resources to get total utility per player
+    # - Apply log utility function and scale by the player's budget
     utilities = []
     for i in range(num_players):
         player_utility = sum(allocation[j, i] * matrix[i][j] for j in range(num_resources))
