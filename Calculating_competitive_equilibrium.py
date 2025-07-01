@@ -1,25 +1,6 @@
 import numpy as np
 import cvxpy
 
-def calculate_resource_prices(matrix, allocation, budgets):
-    num_players = len(matrix)
-    num_resources = len(matrix[0])
-
-    resource_prices = []
-    
-    # Iterate through resources to calculate their prices
-    for resource in range(num_resources):
-        resource_price = 0
-        for player in range(num_players): 
-            if allocation[resource][player] > 1e-6:  # Check if resource has been allocated
-                total_utility = sum(allocation[res][player] * matrix[player][res] for res in range(num_resources))
-                if total_utility > 0:
-                    resource_price = (budgets[player] * matrix[player][resource]) / total_utility
-                    break
-        resource_prices.append(resource_price)
-
-    return resource_prices
-
 def calculate_equilibrium(matrix, budgets):
     # Perform validation on preference matrix to ensure no negative values
     for row in matrix:
@@ -59,7 +40,25 @@ def calculate_equilibrium(matrix, budgets):
 
     return problem.value, allocation.value
 
+def calculate_resource_prices(matrix, allocation, budgets):
+    num_players = len(matrix)
+    num_resources = len(matrix[0])
 
+    resource_prices = []
+    
+    # Iterate through resources to calculate their prices
+    for resource in range(num_resources):
+        resource_price = 0
+        for player in range(num_players): 
+            if allocation[resource][player] > 1e-6:  # Check if resource has been allocated
+                total_utility = sum(allocation[res][player] * matrix[player][res] for res in range(num_resources))
+                if total_utility > 0:
+                    resource_price = (budgets[player] * matrix[player][resource]) / total_utility
+                    break
+        resource_prices.append(resource_price)
+
+    return resource_prices
+    
 def run_example(valuation_matrix, budgets, title=""):
     prob_value, allocation = calculate_equilibrium(valuation_matrix, budgets)
     player_utils = np.sum(allocation.T * valuation_matrix, axis=1)  # שימוש ב- .T להחלפת הממדים של הקצאה
@@ -127,4 +126,10 @@ if __name__ == "__main__":
         valuation_matrix=np.array([[0, 0, 12], [6, 6, 6]], dtype=float),
         budgets=np.array([35, 65], dtype=float),
         title="Example 5"
+    )
+
+    run_example(
+        valuation_matrix=np.array([[2, 4, 8], [5, 6, 2]], dtype=float),
+        budgets=np.array([60, 40], dtype=float),
+        title="Example 6"
     )
